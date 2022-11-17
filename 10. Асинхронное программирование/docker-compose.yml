@@ -1,0 +1,42 @@
+version: "3.2"
+services:
+  approver:
+    container_name: approver
+    image: harand/approver
+    ports:
+      - "7000:8000"
+
+  balance_manager:
+    container_name: balance_manager
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port=8000
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    environment:
+      - POSTGRES_HOST=${DATABASE_HOST}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PORT=${DATABASE_PORT}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - APPROVE_SERVICE_HOST=approver
+      - APPROVE_SERVICE_PORT=8000
+    depends_on:
+      - approver
+      - database
+
+  database:
+    image: postgres
+    container_name: ${DATABASE_HOST}
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    command: postgres -p ${DATABASE_PORT}
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    volumes:
+      - ./database_data:/var/lib/postgresql/data
+      - ./database/create_tables.sql:/docker-entrypoint-initdb.d/1-create_tables.sql:ro
+

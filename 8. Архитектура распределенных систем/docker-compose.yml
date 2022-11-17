@@ -1,0 +1,25 @@
+version: "3.2"
+services:
+  tokenizer:
+    image: harand/tokenizer
+    ports:
+      - "7000:8000"
+
+  tokenizer_replica:
+    image: harand/tokenizer
+    ports:
+      - "9000:8000"
+
+  balancer:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port=8000
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    environment:
+      - STRATEGY=round_robin
+      - SERVICE_LINKS=tokenizer:8000;tokenizer_replica:8000
+    depends_on:
+      - tokenizer
+      - tokenizer_replica

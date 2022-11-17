@@ -1,0 +1,124 @@
+[tool.poetry]
+name = "pharmacy"
+version = "0.1.0"
+description = ""
+authors = ["isayan_denis <isayan1998@gmail.com>"]
+
+# DEPENDENCIES
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^1.9.1"
+fastapi = "^0.78.0"
+SQLAlchemy = "^1.4.39"
+starlette = "^0.19.1"
+SQLAlchemy-Utils = "^0.38.3"
+alembic = "^1.8.1"
+aiohttp = "^3.8.1"
+psycopg2-binary = "^2.9.3"
+uvicorn = "^0.18.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+pytest-aiohttp = "^1.0.4"
+mock = "^4.0.3"
+httpx = "^0.23.0"
+ConfigArgParse = "^1.5.3"
+pytest-cov = "^3.0.0"
+isort = "^5.10.1"
+pylint = "^2.14.4"
+mypy = "^0.961"
+black = "^22.6.0"
+sqlalchemy2-stubs = "^0.0.2-alpha.24"
+freezegun = "^1.2.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# PYTEST
+
+[tool.pytest]
+addopts = "--cov=shortener --cov-report html:coverage-report-html --cov-fail-under=60"
+python_files = "test_*.py"
+python_classes = ["*Test", "Test*"]
+python_functions = "test_*"
+testpaths = "tests/"
+
+[tool.coverage.report]
+exclude_lines = [
+    "# pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "def __unicode__",
+]
+show_missing = true
+skip_empty = true
+omit = [
+  "*/__init__.py",
+  "shortener/db/migrator/env.py",
+]
+
+[tool.coverage.html]
+directory = "pytest-cov-report"
+
+[tool.coverage.run]
+branch = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+# LINTERS
+
+[tool.pylint.master]
+extension-pkg-allow-list = ["pydantic"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.basic]
+good-names = ["db"]
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+  "C0114",  # missing-module-docstring
+  "C0116",  # missing-function-docstring
+  "R0903",  # too-few-public-methods (for sqlalchemy tables and pydantic classes)
+  "C0115",  # missing-class-docstring (for api routes)
+]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = false
+no_implicit_optional = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[tool.black]
+line-length = 120
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
+
+[tool.isort]
+known_local_folder = "shortener"
+lines_after_imports = 2
+multi_line_output = 3
+line_length = 120
+include_trailing_comma = true

@@ -1,0 +1,36 @@
+---
+
+stages:
+  - lint
+  - test
+  - min-coverage
+
+variables:
+  MIN_COVERAGE: 70  # set the threshold at 70%
+
+pylint:
+  stage: lint
+  image: snakepacker/python:all
+  before_script:
+    - python3.10 -m pip install poetry
+    - poetry install
+  script:
+    - poetry run pylint bookmarker tests
+
+pytest:
+  stage: test
+  image: snakepacker/python:all
+  services:
+    - name: postgres:14
+  variables:
+    POSTGRES_DB: bookmarker_db
+    POSTGRES_USER: user
+    POSTGRES_PASSWORD: hackme
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+  before_script:
+    - python3.10 -m pip install poetry
+    - poetry install
+    - wait-for-port postgres:5432
+  script:
+    - poetry run pytest --verbosity=2 --showlocals --log-level=DEBUG --cov=bookmarker --cov-report html --cov-fail-under=$MIN_COVERAGE

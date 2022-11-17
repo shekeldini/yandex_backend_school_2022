@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  database:
+    image: postgres
+    container_name: ${DATABASE_HOST}
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    command: postgres -p ${DATABASE_PORT}
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    volumes:
+      - ./database_data:/var/lib/postgresql/data
+      - ./create_tables.sql:/docker-entrypoint-initdb.d/1-create_tables.sql:ro
+      - ./fill_tables.sql:/docker-entrypoint-initdb.d/2-fill_tables.sql:ro
+      - ./generated_data:/generated_data
+      - ./specialties.txt:/specialties.txt

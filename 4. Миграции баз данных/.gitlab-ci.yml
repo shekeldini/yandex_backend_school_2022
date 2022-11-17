@@ -1,0 +1,22 @@
+---
+
+stages:
+  - test
+
+pytest:
+  stage: test
+  image: registry.yandex-academy.ru/school/2022-06/backend/python/homeworks/hw4_db_migrations
+  services:
+    - name: postgres
+  variables:
+    POSTGRES_DB: sdb_homework
+    POSTGRES_USER: admin
+    POSTGRES_PASSWORD: admin
+    POSTGRES_HOST_AUTH_METHOD: trust
+    GITLAB_RUN: "true"
+  before_script:
+    - python3.10 -m pip install poetry
+    - poetry install
+    - wait-for-port postgres:5432
+  script:
+    - poetry run pytest --verbosity=2 --showlocals --log-level=DEBUG

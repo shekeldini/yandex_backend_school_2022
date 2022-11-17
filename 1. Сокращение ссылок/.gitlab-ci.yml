@@ -1,0 +1,33 @@
+stages:
+  - lint
+  - test
+
+pylint:
+  stage: lint
+  image: snakepacker/python:all
+  before_script:
+    - python3.10 -m pip install poetry
+    - poetry install
+  script:
+    - poetry run pylint shortener tests
+
+pytest:
+  stage: test
+  image: snakepacker/python:all
+  services:
+    - name: postgres
+  variables:
+    POSTGRES_DB: shortener_db
+    POSTGRES_USER: user
+    POSTGRES_PASSWORD: password
+    DB_NAME: shortener_db
+    DB_PATH: postgres
+    DB_USER: user
+    DB_PORT: 5432
+    DB_PASSWORD: password
+  before_script:
+    - python3.10 -m pip install poetry
+    - poetry install
+    - wait-for-port postgres:5432
+  script:
+    - poetry run pytest --verbosity=2 --showlocals --log-level=DEBUG --cov=shortener

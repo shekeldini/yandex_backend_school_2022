@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "Balancer"
+version = "0.1.0"
+description = "Load Balancer"
+authors = ["Isayan Denis"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.79.1"
+pydantic = "^1.9.2"
+requests = "^2.28.1"
+uvicorn = "^0.18.2"
+pytest = "^7.1.2"
+httpx = "^0.23.0"
+asyncio = "^3.4.3"
+pytest-asyncio = "^0.19.0"
+pytest-cov = "^3.0.0"
+greenlet = "^1.1.2"
+mock = "^4.0.3"
+fastapi-utils = "^0.2.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest]
+python_files = "test_*.py"
+python_classes = ["*Test", "Test*"]
+python_functions = "test_*"
+testpaths = "tests/"
+
+[tool.coverage.report]
+exclude_lines = [
+    "# pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "def __unicode__",
+]
+show_missing = true
+skip_empty = true
+
+[tool.coverage.html]
+directory = "pytest-cov-report"
+
+[tool.coverage.run]
+branch = true
+concurrency = ['thread', 'greenlet']
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+

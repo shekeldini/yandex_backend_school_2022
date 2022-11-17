@@ -1,0 +1,319 @@
+openapi: 3.0.2
+info:
+  title: Url shortener
+  description: Микросервис, реализующий возможность укорачивать ссылки.
+  version: 1.0.0
+paths:
+  /api/v1/health_check/ping:
+    get:
+      tags:
+        - Health check
+      summary: Health Check
+      operationId: health_check_api_v1_health_check_ping_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+  /api/v1/make_shorter:
+    post:
+      tags:
+        - Url
+      summary: Make Shorter
+      description: |-
+        Логика работы ручки:
+
+        Проверяем, что у нас еще нет сокращенного варианта урла для переданного длинного адреса
+          - если он уже есть, то возвращаем его
+          - если еще нет:
+              1) Подбираем маленький суффикс, которого еще нет в базе;
+              2) Сохраняем этот суффикс в базу;
+              3) На основе этого суффикса и текущих настроек приложения генерируем полноценный урл;
+              4) Возвращаем результат работы ручки: урл и secret_key для запроса дополнительной информации.
+      operationId: make_shorter_api_v1_make_shorter_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MakeShorterRequest'
+            example:
+              url: https://yandex.ru
+              vip_key: string
+              time_to_live: 10
+              time_to_live_unit: HOURS
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MakeShorterResponse'
+        '400':
+          description: Site with this url does not exists or status code of request >= 400
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/{short_code}:
+    get:
+      tags:
+        - Url
+      summary: Get Long Url
+      description: |-
+        Логика работы ручки:
+
+        Проверяем, что у нас есть short_code в базе:
+          - если он уже есть, то совершаем редирект на длинный урл + увеличиваем счетчик переходов на 1
+          - если нет, то кидаем ошибку;
+      operationId: get_long_url_api_v1__short_code__get
+      parameters:
+        - required: true
+          schema:
+            title: Short Code
+            type: string
+          name: short_code
+          in: path
+        - required: false
+          schema:
+            title: Id
+            type: string
+            format: uuid
+          name: id
+          in: query
+      responses:
+        '307':
+          description: Successful Response
+        '404':
+          description: URL `request.url` doesn't exist
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/{secret_key}:
+    get:
+      tags:
+        - Url
+      summary: Get Info About Link
+      operationId: get_info_about_link_api_v1_admin__secret_key__get
+      parameters:
+        - required: true
+          schema:
+            title: Secret Key
+            type: string
+            format: uuid4
+          name: secret_key
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetInfoAboutLinkResponse'
+        '404':
+          description: Link with this secret key is not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - Url
+      summary: Delete Link
+      operationId: delete_link_api_v1_admin__secret_key__delete
+      parameters:
+        - required: true
+          schema:
+            title: Secret Key
+            type: string
+            format: uuid4
+          name: secret_key
+          in: path
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/qr:
+    post:
+      tags:
+        - QR
+      summary: Make Qr
+      description: |-
+        Идем в базу, ищем запись где UrlStorage.secret_key = QRRequest.secret_key и UrlStorage.dt_expired >= current_time.
+          - Если такой записи отдаем пользователю HTTP_404_NOT_FOUND.
+          - Если такая запись существует.
+            - Отдаем пользователю сгенерированный QR код в котором содержится url вида {host}:{port}{prefix}/{suffix}?id={UrlStorage.id}
+      operationId: make_qr_api_v1_qr_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QRRequest'
+            example:
+              secret_key: 1439bb6f-e9fc-4be9-890e-e2146b3f6086
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    GetInfoAboutLinkResponse:
+      title: GetInfoAboutLinkResponse
+      required:
+        - short_url
+        - long_url
+        - number_of_clicks
+        - number_of_use_qr_code
+        - dt_created
+        - dt_expired
+      type: object
+      properties:
+        short_url:
+          title: Short Url
+          maxLength: 65536
+          minLength: 1
+          type: string
+          format: uri
+        long_url:
+          title: Long Url
+          maxLength: 65536
+          minLength: 1
+          type: string
+          format: uri
+        number_of_clicks:
+          title: Number Of Clicks
+          type: integer
+        number_of_use_qr_code:
+          title: Number Of Use Qr Code
+          type: integer
+        dt_created:
+          title: Dt Created
+          type: string
+          format: date-time
+        dt_expired:
+          title: Dt Expired
+          type: string
+          format: date-time
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        detail:
+          title: Detail
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    MakeShorterRequest:
+      title: MakeShorterRequest
+      required:
+        - url
+      type: object
+      properties:
+        url:
+          title: URL to be shortened
+          maxLength: 65536
+          minLength: 1
+          type: string
+          format: uri
+        vip_key:
+          title: Short VIP URL
+          type: string
+        time_to_live:
+          title: Lifetime URL
+          type: integer
+          default: 10
+        time_to_live_unit:
+          title: Time unit
+          allOf:
+            - $ref: '#/components/schemas/TimeUnit'
+          default: HOURS
+    MakeShorterResponse:
+      title: MakeShorterResponse
+      required:
+        - short_url
+        - secret_key
+      type: object
+      properties:
+        short_url:
+          title: Shortened URL
+          maxLength: 65536
+          minLength: 1
+          type: string
+          format: uri
+        secret_key:
+          title: Secret Key
+          type: string
+          format: uuid4
+    PingResponse:
+      title: PingResponse
+      type: object
+      properties:
+        message:
+          title: Message
+          type: string
+          default: Pong!
+    QRRequest:
+      title: QRRequest
+      required:
+        - secret_key
+      type: object
+      properties:
+        secret_key:
+          title: Secret key for short string
+          type: string
+          format: uuid4
+    TimeUnit:
+      title: TimeUnit
+      enum:
+        - SECONDS
+        - MINUTES
+        - HOURS
+        - DAYS
+      type: string
+      description: An enumeration.
+    ValidationError:
+      title: ValidationError
+      required:
+        - loc
+        - msg
+        - type
+      type: object
+      properties:
+        loc:
+          title: Location
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+tags:
+  - name: Url
+    description: 'Manage urls: make them shorter and redirect to long version.'
+  - name: Health check
+    description: API health check.

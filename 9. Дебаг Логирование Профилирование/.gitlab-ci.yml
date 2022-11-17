@@ -1,0 +1,6 @@
+build-and-run-tests:
+  stage: test
+  image: snakepacker/python:all
+  script:
+    - python3.10 -m pip install -r ./requirements.txt
+    - python3.10 -m pytest

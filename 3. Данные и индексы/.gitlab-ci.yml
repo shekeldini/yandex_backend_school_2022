@@ -1,0 +1,15 @@
+test:
+  image: registry.yandex-academy.ru/school/2022-06/backend/python/homeworks/hw3-search/fruits/service-base:latest
+  services:
+  - name: registry.yandex-academy.ru/school/2022-06/backend/python/homeworks/hw3-search/fruits/store:latest
+    alias: store
+  script:
+  - cd src/
+  # на случай, если были сделаны изменения в коде
+  - python manage.py migrate
+  - pytest --durations=0
+  artifacts:
+    when: always
+    reports:
+      junit: src/report.xml
+

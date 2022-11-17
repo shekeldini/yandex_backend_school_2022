@@ -1,0 +1,10 @@
+fastapi
+pydantic
+requests
+uvicorn
+pytest
+asyncpg
+SQLAlchemy
+psycopg2-binary
+pydantic[dotenv]
+aiofiles

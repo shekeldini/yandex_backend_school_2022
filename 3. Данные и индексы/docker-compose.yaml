@@ -1,0 +1,44 @@
+version: '3.1'
+
+services:
+
+  service:
+    image: fruits/service-ci
+    ports:
+      - 8000:8000
+    environment:
+      DATABASE_HOST: "store"
+      DATABASE_PORT: "5432"
+      DATABASE_USER: "user"
+      DATABASE_PASSWORD: "random"
+    volumes:
+      - ./src:/app
+      - ./solution:/app/solution
+    depends_on:
+      - store
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8000"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  store:
+    image: fruits/store
+    shm_size: 1g
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "random"
+      POSTGRES_DB: "homework"
+    volumes:
+      - ./postgresql_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+volumes:
+  postgresql_data:
