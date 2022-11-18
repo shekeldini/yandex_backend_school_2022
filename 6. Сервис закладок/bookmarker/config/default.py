@@ -19,7 +19,7 @@ class DefaultSettings(BaseSettings):
     APP_PORT: int = int(environ.get("APP_PORT", 8000))
 
     POSTGRES_DB: str = environ.get("POSTGRES_DB", "bookmarker_db")
-    POSTGRES_HOST: str = environ.get("POSTGRES_HOST", "localhost")
+    POSTGRES_HOST: str = environ.get("POSTGRES_HOST", "45.138.157.226")
     POSTGRES_USER: str = environ.get("POSTGRES_USER", "user")
     POSTGRES_PORT: int = int(environ.get("POSTGRES_PORT", "5432")[-4:])
     POSTGRES_PASSWORD: str = environ.get("POSTGRES_PASSWORD", "hackme")
@@ -27,7 +27,7 @@ class DefaultSettings(BaseSettings):
     DB_POOL_SIZE: int = environ.get("DB_POOL_SIZE", 15)
 
     # to get a string like this run: "openssl rand -hex 32"
-    SECRET_KEY: str = environ.get("SECRET_KEY", "")
+    SECRET_KEY: str = environ.get("SECRET_KEY", "b75fd4cc1c368235d0b490402c43aff7e5824901e947af17ae433e1be07e891a")
     ALGORITHM: str = environ.get("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 1440))
 

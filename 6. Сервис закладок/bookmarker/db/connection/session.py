@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy import create_engine
 from bookmarker.config import get_settings
 
 
@@ -11,6 +11,8 @@ class SessionManager:
     """
 
     def __init__(self) -> None:
+        self.engine = None
+        self.session_local = None
         self.refresh()
 
     def __new__(cls):
@@ -23,6 +25,13 @@ class SessionManager:
 
     def refresh(self) -> None:
         self.engine = create_async_engine(get_settings().database_uri, echo=True, future=True)
+
+    def get_sinc_session(self):
+        return self.session_local()
+
+    def refresh_sinc(self):
+        self.engine = create_engine(get_settings().database_uri_sync, pool_pre_ping=True)
+        self.session_local = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
 
 async def get_session() -> AsyncSession:

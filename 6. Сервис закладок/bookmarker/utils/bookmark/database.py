@@ -1,6 +1,8 @@
 from pydantic import UUID4
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select as future_select
+from sqlalchemy.orm import joinedload
 
 from bookmarker.db.enums import BookmarksSortKey
 from bookmarker.db.models import Bookmark, Tag, User
@@ -86,6 +88,6 @@ def build_query_for_retrieve_list_of_bookmarks(
             query = query.order_by(Bookmark.link)
         case BookmarksSortKey.BY_TITLE:
             query = query.order_by(Bookmark.title)
-        case None:
+        case _:
             query = query.order_by(Bookmark.id)
     return query

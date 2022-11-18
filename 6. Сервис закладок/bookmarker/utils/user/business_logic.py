@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from fastapi import Depends, HTTPException
 from jose import JWTError, jwt
-from passlib.exc import UnknownHashError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -17,7 +16,7 @@ async def authenticate_user(
     session: AsyncSession,
     username: str,
     password: str,
-) -> User | bool:
+):
     user = await get_user(session, username)
     if not user:
         return False
@@ -29,7 +28,7 @@ async def authenticate_user(
 def create_access_token(
     data: dict,
     expires_delta: timedelta | None = None,
-) -> str:
+):
     settings = get_settings()
     to_encode = data.copy()
     if expires_delta:
@@ -44,12 +43,9 @@ def create_access_token(
 def verify_password(
     plain_password: str,
     hashed_password: str,
-) -> bool:
+):
     pwd_context = get_settings().PWD_CONTEXT
-    try:  # ERROR: Приложение падало при попытке передать пароль захешированный с помощью другой функции
-        return pwd_context.verify(plain_password, hashed_password)
-    except UnknownHashError:
-        return False
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 async def get_current_user(

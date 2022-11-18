@@ -27,7 +27,6 @@ bcrypt = "^3.2.2"
 fastapi-pagination = "^0.9.3"
 url-normalize = "^1.4.3"
 beautifulsoup4 = "^4.11.1"
-jose = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
@@ -43,10 +42,6 @@ black = "^22.6.0"
 sqlalchemy2-stubs = "^0.0.2-alpha.24"
 autoflake = "^1.4"
 watchfiles = "^0.16.1"
-Faker = "^13.15.1"
-factory-boy = "^3.2.1"
-freezegun = "^1.2.1"
-vcrpy = "^4.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -79,7 +74,6 @@ directory = "pytest-cov-report"
 
 [tool.coverage.run]
 branch = true
-concurrency = ['thread', 'greenlet']
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

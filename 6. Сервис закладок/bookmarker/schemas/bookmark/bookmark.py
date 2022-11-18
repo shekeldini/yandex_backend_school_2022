@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel, Extra, HttpUrl, constr, validator
+from pydantic import UUID4, BaseModel, Extra, HttpUrl, validator
 from url_normalize import url_normalize
 
 
@@ -18,7 +18,7 @@ class Bookmark(BaseModel):
 
 class BookmarkCreateRequest(BaseModel):
     link: HttpUrl
-    tag: constr(min_length=1) | None  # ERROR: здесь нужно было указать минимальную длину названия тега
+    tag: str | None
 
     @validator("link")
     def normalize_link(cls, link):

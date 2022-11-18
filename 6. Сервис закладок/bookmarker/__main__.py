@@ -45,7 +45,7 @@ def get_app() -> FastAPI:
 
 app = get_app()
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     settings_for_application = get_settings()
     run(
         "bookmarker.__main__:app",

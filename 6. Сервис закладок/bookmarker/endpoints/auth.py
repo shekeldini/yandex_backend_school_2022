@@ -23,11 +23,6 @@ api_router = APIRouter(
     "/authentication",
     status_code=status.HTTP_200_OK,
     response_model=Token,
-    responses={  # ERROR: здесь в ручке было не указано, что она может возвращать HTTP_401_UNAUTHORIZED
-        status.HTTP_401_UNAUTHORIZED: {
-            "description": "Incorrect username or password",
-        },
-    },
 )
 async def authentication(
     _: Request,
